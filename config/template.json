@@ -1,43 +1,43 @@
 {
-		"kind": "Template",
-		"apiVersion": "v1",
-		"metadata": {
-				"name": "${APP_NAME}",
-				"annotations": {
-						"tags": "${APP_NAME}",
-						"iconClass": "icon-${APP_NAME}"
-				}
-		},
-		"labels": {
-				"template": "${APP_NAME}",
-				"app": "${APP_NAME}"
-		},
-		"objects": [
+   "kind": "Template",
+   "apiVersion": "v1",
+   "metadata": {
+      "name": "${APP_NAME}",
+      "annotations": {
+	 			"tags": "${APP_NAME}",
+	 			"iconClass": "icon-${APP_NAME}"
+      }
+   },
+   "labels": {
+      "template": "${APP_NAME}",
+      "app": "${APP_NAME}"
+   },
+   "objects": [
+      {
+	   		"apiVersion": "v1",
+	   		"kind": "ImageStream",
+	   		"metadata": {
+	      	"name": "${APP_NAME}"
+	      	"labels": {
+		 				"application": "${APP_NAME}"
+	      	}
+	   		},
+	   		"spec": {
+	      	"lookupPolicy": {
+		 				"local": false
+	      	}
+      	}
+      },
 			{
-					"apiVersion": "v1",
-					"kind": "ImageStream",
-					"metadata": {
-						"name": "${APP_NAME}"
-						"labels": {
-								"application": "${APP_NAME}"
-						}
+				"apiVersion": "v1",
+				"kind": "BuildConfig",
+				"metadata": {
+					"labels": {
+						"application": "${APP_NAME}"
 					},
-					"spec": {
-						"lookupPolicy": {
-							"local": false
-						}
-				 }
-			},
-			{
-					"apiVersion": "v1",
-					"kind": "BuildConfig",
-					"metadata": {
-							"labels": {
-									"application": "${APP_NAME}"
-							},
-							"name" : "${APP_NAME}"
-					},
-					"spec": {
+					"name" : "${APP_NAME}"
+				},
+				"spec": {
 						"source": {
 								"type": "Git",
 								"git": {
@@ -64,15 +64,15 @@
 						},
 						"triggers": [
          			 {
-            			"type": "BitBucket",
+            			"type": "GitHub",
             			"generic": {
-               			"secret": "bitbucket-secret"
+               			"secret": "github-secret"
             			}
          			 },
          			 {
             			"type": "Generic",
             			"github": {
-               			"secret": "bitbucket-secret"
+               			"secret": "github-secret"
             			}
          			},
          			{
