@@ -23,6 +23,13 @@
 		<java.version>11</java.version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>nexus</id>
+			<url>http://nexus-repository-manager-nexus.apps.cluster-89e8.89e8.sandbox1804.opentlc.com/</url>
+		</repository>
+	</distributionManagement>
+	
 	<dependencies>
 		<!-- Internal Dependency -->
 		<dependency>
@@ -68,7 +75,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 	
 	<build>
