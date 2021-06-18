@@ -26,7 +26,7 @@
 	<distributionManagement>
 		<repository>
 			<id>nexus</id>
-			<url>http://nexus-repository-manager-nexus.apps.cluster-89e8.89e8.sandbox1804.opentlc.com/</url>
+			<url>http://nexus-repository-manager-nexus.apps.cluster-89e8.89e8.sandbox1804.opentlc.com/repository/maven-snapshots/</url>
 		</repository>
 	</distributionManagement>
 	
