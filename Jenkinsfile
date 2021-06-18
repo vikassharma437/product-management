@@ -1,7 +1,7 @@
 def DEV_API_SERVER="https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
 def DEV_NAMESPACE = "dev"
-def templatePath = "config/template.json"
-def mvnCmd = "mvn -s config/settings.xml"
+def templatePath = "/tmp/workspace/cicd-sample-app-dev/config/template.json"
+def mvnCmd = "mvn -s /tmp/workspace/cicd-sample-app-dev/config/settings.xml"
 
 pipeline{
 		agent{
@@ -13,11 +13,11 @@ pipeline{
       	buildconf = "false"
     }
 		stages {
-        stage('Application Code Checkout') {
+        /*stage('Application Code Checkout') {
 						steps {
 								checkout scm
 						}
-				}
+				}*/
         stage('Build Common Lib'){
           steps {
             sh "mkdir -p /tmp/common-lib"
