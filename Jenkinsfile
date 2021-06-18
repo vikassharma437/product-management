@@ -19,10 +19,14 @@ pipeline{
 						}
 				}
         stage('Build Common Lib'){
-          steps{
-            git url: 'https://github.com/vikassharma437/common-lib.git',
-            credentialsId: 'cicd-github-jenkins'
-            sh "${mvnCmd} clean deploy -DskipTests=true -Dversion=${env.BUILD_NUMBER}"
+          steps {
+            sh "mkdir -p /tmp/common-lib"
+            dir("/tmp/common-lib") {
+              git branch: 'main',
+              credentialsId: 'cicd-github-jenkins',
+              url: 'https://github.com/vikassharma437/common-lib.git'
+              sh "${mvnCmd} clean deploy -DskipTests=true -Dversion=${env.BUILD_NUMBER}"
+            }
           }
         }
 				stage('Application Code Compile'){
