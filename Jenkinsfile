@@ -13,17 +13,12 @@ pipeline{
       	buildconf = "false"
     }
 		stages {
-        /*stage('Application Code Checkout') {
-						steps {
-								checkout scm
-						}
-				}*/
         stage('Build Common Lib'){
           steps {
             sh "mkdir -p /tmp/common-lib"
             dir("/tmp/common-lib") {
               git branch: 'main',
-              credentialsId: 'cicd-github-jenkins',
+              credentialsId: 'git-credential',
               url: 'https://github.com/vikassharma437/common-lib.git'
               sh "${mvnCmd} clean deploy -DskipTests=true -Dversion=${env.BUILD_NUMBER}"
             }
@@ -44,8 +39,7 @@ pipeline{
             steps {
                 sh "${mvnCmd} deploy -DskipTests=true -Dversion=${env.BUILD_NUMBER}"
             }
-        }
-				
+        }	
         stage('Deploy Template in DEV Namespace') {
   					steps{
   							script {
