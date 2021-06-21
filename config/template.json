@@ -192,15 +192,15 @@
 																"image": "image-registry.openshift-image-registry.svc:5000/${PROJECT}/${APP_NAME}:latest",
 																"ports": [
 																		{
-																				"containerPort": 8080
+																				"containerPort": 8080,
 																				"protocol": "TCP"
 																		},
 																		{
-																				"containerPort": 8443
+																				"containerPort": 8443,
 																				"protocol": "TCP"
 																		},
 																		{
-																				"containerPort": 8778
+																				"containerPort": 8778,
 																				"protocol": "TCP"
 																		}
 																],
