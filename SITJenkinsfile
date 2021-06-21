@@ -1,6 +1,4 @@
 #!bash
-def templatePath = "config/template.json"
-def settingsXml  = "config/settings.xml"
 
 pipeline {
   agent {
@@ -12,6 +10,8 @@ pipeline {
     buildconf = "false"
     DEV_NAMESPACE = "dev"
     SIT_NAMESPACE = "sit"
+    templatePath = "config/template.json"
+    settingsXml  = "config/settings.xml"
     DEV_API_SERVER= "https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
   }
   stages {
