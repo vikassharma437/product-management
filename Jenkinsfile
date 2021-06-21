@@ -46,17 +46,17 @@ pipeline{
   					steps{
   							script {
   									try {
-                        openshift.withCluster('devCluster', "${DEV_OCP_PASSWD}") {
+                        openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
                             openshift.withProject("${DEV_NAMESPACE}") {
                               echo "Using project: ${openshift.project()}"
                               echo "Using AppName: ${appName}"
-                              sh "oc login -u ${DEV_OCP_USER} -p ${DEV_OCP_PASSWD} ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true"
+                              sh "oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true"
                               buildconf = sh(script: 'oc get bc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
                               buildconf = buildconf.trim()
                               echo "BuildConfig status contains: '${buildconf}'"
 
                               if(buildconf == 'false') {
-                                 sh "oc new-app ${templatePath} --as-deployment-config -n ${DEV_NAMESPACE} -p PROJECT=${DEV_NAMESPACE} -p APP_NAME=${appName}"
+                                 sh "oc new-app ${templatePath} -n ${DEV_NAMESPACE} -p PROJECT=${DEV_NAMESPACE} -p APP_NAME=${appName}"
                               } else {
                                 echo "Template is already exist. Hence, skipping this stage."
                               }
@@ -76,9 +76,9 @@ pipeline{
 				       script {
 					          try {
 						            timeout(time: 180, unit: 'SECONDS') {
-							              openshift.withCluster('devCluster', "${DEV_OCP_PASSWD}") {
+							              openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
 								                openshift.withProject(${DEV_NAMESPACE}) {
-                                    sh "oc login -u ${DEV_OCP_USER} -p ${DEV_OCP_PASSWD} ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true"
+                                    sh "oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true"
                                     sh "oc start-build ${appName} --from-file=target/${appName}-${appVersion}.jar --wait=true"
                                     echo "Build ${appName} deployed successfully in ${DEV_NAMESPACE} namespace"
 									              }
@@ -94,9 +94,9 @@ pipeline{
 		  stage('Tag Image in Dev Namespace') {
 			    steps {
 				      script {
-                  openshift.withCluster('devCluster', "${DEV_OCP_PASSWD}") {
+                  openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
                       openshift.withProject(${DEV_NAMESPACE}) {
-                            sh "oc login -u ${DEV_OCP_USER} -p ${DEV_OCP_PASSWD} ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true"
+                            sh "oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true"
 						                sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${DEV_NAMESPACE}/${appName}:${env.BUILD_NUMBER} -n ${DEV_NAMESPACE}"
 					            }
 				          }
