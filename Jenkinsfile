@@ -76,7 +76,7 @@ pipeline{
 					          try {
 						            timeout(time: 180, unit: 'SECONDS') {
 							              openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
-								                openshift.withProject(${DEV_NAMESPACE}) {
+								                openshift.withProject("${DEV_NAMESPACE}") {
                                     sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true')
                                     sh "oc start-build ${appName} --from-file=target/${appName}-${appVersion}.jar --wait=true"
                                     echo "Build ${appName} deployed successfully in ${DEV_NAMESPACE} namespace"
@@ -94,7 +94,7 @@ pipeline{
 			    steps {
 				      script {
                   openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
-                      openshift.withProject(${DEV_NAMESPACE}) {
+                      openshift.withProject("${DEV_NAMESPACE}") {
                             sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${DEV_NAMESPACE} --insecure-skip-tls-verify=true')
 						                sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${DEV_NAMESPACE}/${appName}:${env.BUILD_NUMBER} -n ${DEV_NAMESPACE}"
 					            }
