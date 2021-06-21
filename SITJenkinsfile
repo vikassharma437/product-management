@@ -1,4 +1,4 @@
-#!groovy
+#!bash
 def templatePath = "config/template.json"
 
 pipeline {
