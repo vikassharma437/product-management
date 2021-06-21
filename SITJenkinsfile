@@ -1,5 +1,6 @@
 #!groovy
 def templatePath = "config/template.json"
+def 
 
 pipeline {
   agent {
