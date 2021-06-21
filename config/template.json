@@ -53,7 +53,7 @@
 												"kind": "ImageStreamTag",
 												"name": "openjdk-8:latest",
 												"namespace": "openshift"
-										},
+										}
 								}
 						},
 						"output": {
