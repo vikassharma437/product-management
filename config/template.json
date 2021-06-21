@@ -47,7 +47,7 @@
 								"contextDir": ""
 						},
 						"strategy": {
-								"type": "Source"
+								"type": "Source",
 								"sourceStrategy": {
 										"from": {
 												"kind": "ImageStreamTag",
