@@ -71,7 +71,7 @@ pipeline {
                 openshift.withProject("${SIT_NAMESPACE}") {
                   echo "Using project: ${openshift.project()}"
                   sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                  sh(script: 'oc start-build ${appName}:latest --wait=true --follow=true', returnStdout:true).trim()
+                  sh(script: 'oc start-build ${appName} --wait=true --follow=true', returnStdout:true).trim()
                   echo "Build ${appName} deployed successfully"
                 }
               }
