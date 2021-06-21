@@ -61,7 +61,7 @@ pipeline {
         }
       }
     }
-    /*stage('Start Build to SIT Namespace') {
+    stage('Start Build to SIT Namespace') {
       steps {
         script {
           try {
@@ -70,7 +70,7 @@ pipeline {
                 openshift.withProject("${SIT_NAMESPACE}") {
                   echo "Using project: ${openshift.project()}"
                   sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                  def build = sh(script: 'oc start-build ${appName} --wait=true', returnStdout:true).trim()
+                  def build = sh(script: 'oc start-build ${appName} --wait=true --follow=true', returnStdout:true).trim()
                   build.untilEach {
                       return it.object().status.phase == "Complete"
                   }
@@ -84,6 +84,6 @@ pipeline {
           }
         }
       }
-    }*/
+    }
   }
 }
