@@ -1,0 +1,90 @@
+#!groovy
+def templatePath = "/tmp/workspace/cicd-sample-app-dev/config/template.json"
+def mvnCmd = "mvn -s /tmp/workspace/cicd-sample-app-dev/config/settings.xml"
+
+pipeline {
+	agent {
+		label 'docker'
+	}
+  environment {
+    appName = "sample-app"
+    appVersion = "0.0.1-SNAPSHOT"
+    buildconf = "false"
+    DEV_NAMESPACE = "dev"
+    SIT_NAMESPACE = "sit"
+    DEV_API_SERVER= "https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
+  }
+  stages {
+    stage('Deploy Template in SIT Namespace') {
+      steps{
+        script {
+          try {
+            openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
+                openshift.withProject("${SIT_NAMESPACE}") {
+                  echo "Using project: ${openshift.project()}"
+                  echo "Using AppName: ${appName}"
+                  sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
+                  buildconf = sh(script: 'oc get bc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+                  buildconf = buildconf.trim()
+                  echo "BuildConfig status contains: '${buildconf}'"
+
+                  if(buildconf == 'false') {
+                     sh "oc new-app ${templatePath} -n ${SIT_NAMESPACE} -p PROJECT=${SIT_NAMESPACE} -p APP_NAME=${appName}"
+                  } else {
+                    echo "Template is already exist. Hence, skipping this stage."
+                  }
+               }
+            }
+          } catch(e) {
+            print e.getMessage()
+            error "${SIT_NAMESPACE} deploy template stage having some issue. Please check logs for more details."
+          }
+        }
+      }
+    }
+    stage('Promote Image in SIT Namespace') {
+      steps {
+        script {
+          try {
+            openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
+              openshift.withProject("${SIT_NAMESPACE}") {
+                echo "Using project: ${openshift.project()}"
+                echo "Using AppName: ${appName}"
+                sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
+                sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:${env.BUILD_NUMBER} -n ${SIT_NAMESPACE}"
+                sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:latest -n ${SIT_NAMESPACE}"
+              }
+            }
+          } catch(e) {
+             print e.getMessage()
+             error "${SIT_NAMESPACE} promote stage having some issue. Please check logs for more details."
+          }
+        }
+      }
+    }
+    stage('Start Build to SIT Namespace') {
+      steps {
+        script {
+          try {
+            timeout(time: 120, unit: 'SECONDS') {
+              openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
+                openshift.withProject("${SIT_NAMESPACE}") {
+                  echo "Using project: ${openshift.project()}"
+                  sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
+                  def build = sh(script: 'oc start-build ${appName} --wait=true', returnStdout:true).trim()
+                  build.untilEach {
+                      return it.object().status.phase == "Complete"
+                  }
+                  echo "Build ${appName} deployed successfully"
+                }
+              }
+            }
+          } catch(e) {
+            print e.getMessage()
+            error "${SIT_NAMESPACE} start build stage having some issue. Please check logs for more details."
+          }
+        }
+      }
+    }
+  }
+}
