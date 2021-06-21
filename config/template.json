@@ -51,7 +51,7 @@
 								"sourceStrategy": {
 										"from": {
 												"kind": "ImageStreamTag",
-												"name": "openjdk-8:latest",
+												"name": "openjdk-11-rhel8:1.0",
 												"namespace": "openshift"
 										}
 								}
