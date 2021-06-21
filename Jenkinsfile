@@ -56,7 +56,7 @@ pipeline{
                               echo "BuildConfig status contains: '${buildconf}'"
 
                               if(buildconf == 'false') {
-                                 sh "oc new-app ${templatePath} -n ${DEV_NAMESPACE} -p PROJECT=${DEV_NAMESPACE} -p APP_NAME=${appName}"
+                                 sh "oc new-app -n ${DEV_NAMESPACE} -p PROJECT=${DEV_NAMESPACE} -p APP_NAME=${appName}"
                               } else {
                                 echo "Template is already exist. Hence, skipping this stage."
                               }
@@ -64,7 +64,7 @@ pipeline{
                         }
                      } catch(e) {
                        print e.getMessage()
-                       echo "${DEV_NAMESPACE} stage having some issue so this stage can be ignored. Please check logs for more details."
+                       error "${DEV_NAMESPACE} stage having some issue so this stage can be ignored. Please check logs for more details."
                      }
                 }
             }
