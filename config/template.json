@@ -1,6 +1,6 @@
 {
    "kind": "Template",
-   "apiVersion": "v1",
+   "apiVersion": "template.openshift.io/v1",
    "metadata": {
       "name": "${APP_NAME}",
       "annotations": {
@@ -62,24 +62,7 @@
 										"name": "${APP_NAME}:latest"
 								}
 						},
-						"triggers": [
-         			 {
-            			"type": "GitHub",
-            			"generic": {
-               			"secret": "github-secret"
-            			}
-         			 },
-         			 {
-            			"type": "Generic",
-            			"github": {
-               			"secret": "github-secret"
-            			}
-         			},
-         			{
-            			"type": "ImageChange",
-            			"imageChange": {}
-         			}
-      		 ]
+						"triggers": []
 				 }
 				},
 				{
