@@ -61,7 +61,7 @@ pipeline {
         }
       }
     }
-    stage('Start Build to SIT Namespace') {
+    /*stage('Start Build to SIT Namespace') {
       steps {
         script {
           try {
@@ -84,6 +84,6 @@ pipeline {
           }
         }
       }
-    }
+    }*/
   }
 }
