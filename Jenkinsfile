@@ -90,7 +90,7 @@ pipeline{
 				       }
 			    }
 		  }
-		  stage('Tag Image in Dev Namespace') {
+		  stage('Tag Image') {
 			    steps {
 				      script {
                   openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
