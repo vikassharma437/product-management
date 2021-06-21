@@ -4,8 +4,8 @@
    "metadata": {
       "name": "${APP_NAME}",
       "annotations": {
-	 			"tags": "${APP_NAME}",
-	 			"iconClass": "icon-${APP_NAME}"
+	 "tags": "${APP_NAME}",
+	 "iconClass": "icon-${APP_NAME}"
       }
    },
    "labels": {
@@ -14,196 +14,195 @@
    },
    "objects": [
       {
-	   		"apiVersion": "v1",
-	   		"kind": "ImageStream",
-	   		"metadata": {
-	      	"name": "${APP_NAME}",
-	      	"labels": {
-		 				"application": "${APP_NAME}"
-	      	}
-	   		},
-	   		"spec": {
-	      	"lookupPolicy": {
-		 				"local": false
-	      	}
-      	}
-      },
+	 "apiVersion": "v1",
+	 "kind": "ImageStream",
+	 "metadata": {
+	     "name": "${APP_NAME}",
+	     "labels": {
+		"application": "${APP_NAME}"
+	     }
+	  },
+	  "spec": {
+	     "lookupPolicy": {
+		"local": false
+	     }
+      	  }
+       },
+       {
+	  "apiVersion": "v1",
+	  "kind": "BuildConfig",
+	  "metadata": {
+	     "labels": {
+	     	"application": "${APP_NAME}"
+	     },
+	     "name" : "${APP_NAME}"
+	  },
+	  "spec": {
+	     "source": {
+		"type": "Git",
+		"git": {
+		   "uri": "https://github.com/vikassharma437/product-management.git",
+		   "ref": "main"
+		},
+		"contextDir": ""
+	    },
+	    "strategy": {
+		"type": "Source",
+		"sourceStrategy": {
+		   "from": {
+		      "kind": "ImageStreamTag",
+		      "name": "openjdk-11-rhel8:1.0",
+		      "namespace": "openshift"
+		   }
+		}
+	     },
+	     "output": {
+		"to": {
+		   "kind": "ImageStreamTag",
+		   "name": "${APP_NAME}:latest"
+		}
+	     },
+	     "triggers": []
+	  }
+       },
+       {
+	  "kind": "Service",
+	  "apiVersion": "v1",
+	  "metadata": {
+	     "name": "${APP_NAME}",
+	     "annotations": {
+		"description": "Exposes the application pods."
+	     }
+	  },
+	  "spec": {
+	    "ports": [
+	      {
+		"name": "8080-tcp",
+		"port": 8080,
+		"targetPort": 8080
+	      },
+	      {
+		"name": "8443-tcp",
+		"port": 8443,
+		"targetPort": 8443
+	      },
+              {
+		"name": "8778-tcp",
+		"port": 8778,
+		"targetPort": 8778
+              },
+              {
+		"name": "7071-tcp",
+		"port": 7071,
+		"targetPort": 7071
+              }
+	   ],
+	   "selector": {
+	      "name": "${APP_NAME}"
+	   }
+        }
+     },
+     {
+	"kind": "Route",
+	"apiVersion": "v1",
+	"metadata": {
+	   "name": "${APP_NAME}"
+	},
+	"spec": {
+	   "port": {
+	     "targetPort": "7080-tcp"
+	   },
+	   "to": {
+	     "kind": "Service",
+	     "name": "${APP_NAME}"
+	   }
+	}
+     },
+     {
+	"kind": "DeploymentConfig",
+	"apiVersion": "v1",
+	"metadata": {
+	  "name": "${APP_NAME}",
+	  "labels": {
+            "app": "${APP_NAME}"
+	  }
+	},
+	"spec": {
+	   "strategy": {
+	      "rollingParams": {
+		"maxSurge": "25%",
+		"maxUnavailable": "25%"
+	      },
+              "type": "Rolling"
+	  },
+	  "replicas": 1,
+	  "selector": {
+	      "name": "${APP_NAME}"
+	  },
+	  "triggers": [
+	    {
+	      "imageChangeParams": {
+	         "automatic": true,
+	         "containerNames": [
+		    "${APP_NAME}"
+	         ],
+	         "from": {
+		    "kind": "ImageStreamTag",
+		    "name": "${APP_NAME}:latest"
+	         }
+	      },
+	      "type": "ImageChange"
+            }
+	  ],
+	  "template": {
+	     "metadata": {
+		"name": "${APP_NAME}",
+		"labels": {
+		   "name": "${APP_NAME}"
+		}
+	    },
+	    "spec": {
+		"containers": [
+		   {
+		      "env": [
 			{
-				"apiVersion": "v1",
-				"kind": "BuildConfig",
-				"metadata": {
-					"labels": {
-						"application": "${APP_NAME}"
-					},
-					"name" : "${APP_NAME}"
-				},
-				"spec": {
-						"source": {
-								"type": "Git",
-								"git": {
-										"uri": "https://github.com/vikassharma437/product-management.git",
-										"ref": "main"
-								},
-								"contextDir": ""
-						},
-						"strategy": {
-								"type": "Source",
-								"sourceStrategy": {
-										"from": {
-												"kind": "ImageStreamTag",
-												"name": "openjdk-11-rhel8:1.0",
-												"namespace": "openshift"
-										}
-								}
-						},
-						"output": {
-								"to": {
-										"kind": "ImageStreamTag",
-										"name": "${APP_NAME}:latest"
-								}
-						},
-						"triggers": []
-				 }
-				},
-				{
-						"kind": "Service",
-						"apiVersion": "v1",
-						"metadata": {
-								"name": "${APP_NAME}",
-								"annotations": {
-										"description": "Exposes the application pods."
-								}
-						},
-						"spec": {
-								"ports": [
-										{
-												"name": "8080-tcp",
-												"port": 8080,
-												"targetPort": 8080
-										},
-										{
-												"name": "8443-tcp",
-												"port": 8443,
-												"targetPort": 8443
-										},
-										{
-												"name": "8778-tcp",
-												"port": 8778,
-												"targetPort": 8778
-										},
-                    {
-												"name": "7071-tcp",
-												"port": 7071,
-												"targetPort": 7071
-										}
-								],
-								"selector": {
-										"name": "${APP_NAME}"
-								}
-						}
-				},
-				{
-						"kind": "Route",
-						"apiVersion": "v1",
-						"metadata": {
-								"name": "${APP_NAME}"
-						},
-						"spec": {
-								"port": {
-										"targetPort": "7080-tcp"
-								},
-								"to": {
-										"kind": "Service",
-										"name": "${APP_NAME}"
-								}
-
-						}
-				},
-				{
-						"kind": "DeploymentConfig",
-						"apiVersion": "v1",
-						"metadata": {
-								"name": "${APP_NAME}",
-								"labels": {
-									 "app": "${APP_NAME}"
-								}
-						},
-						"spec": {
-								"strategy": {
-										"rollingParams": {
-												"maxSurge": "25%",
-												"maxUnavailable": "25%"
-										},
-										"type": "Rolling"
-								},
-								"replicas": 1,
-								"selector": {
-										"name": "${APP_NAME}"
-								},
-								"triggers": [
-										{
-												"imageChangeParams": {
-														"automatic": true,
-														"containerNames": [
-																"${APP_NAME}"
-														],
-														"from": {
-																"kind": "ImageStreamTag",
-																"name": "${APP_NAME}:latest"
-														}
-												},
-												"type": "ImageChange"
-										}
-								],
-								"template": {
-										"metadata": {
-												"name": "${APP_NAME}",
-												"labels": {
-														"name": "${APP_NAME}"
-												}
-										},
-										"spec": {
-												"containers": [
-														{
-															 "env": [
-																	{
-																			"name": "TZ",
-																			"value": "Asia/Kolkata"
-																	}
-															  ],
-																"name": "${APP_NAME}",
-																"image": "image-registry.openshift-image-registry.svc:5000/${PROJECT}/${APP_NAME}:latest",
-																"ports": [
-																		{
-																				"containerPort": 8080,
-																				"protocol": "TCP"
-																		},
-																		{
-																				"containerPort": 8443,
-																				"protocol": "TCP"
-																		},
-																		{
-																				"containerPort": 8778,
-																				"protocol": "TCP"
-																		}
-																],
-																"resources": {}
-														}
-												]
-										}
-								}
-						}
-				}
-		],
-		"parameters": [
-				{
-						"name": "APP_NAME",
-						"displayName": "Name of the Application."
-				},
-				{
-						"name": "PROJECT",
-						"displayName": "Project",
-						"description": "Environment to be deployed on."
-				}
-		]
+			   "name": "TZ",
+			   "value": "Asia/Kolkata"
+		        }
+		      ],
+		      "name": "${APP_NAME}",
+		      "image": "image-registry.openshift-image-registry.svc:5000/${PROJECT}/${APP_NAME}:latest",
+		      "ports": [
+			 {
+			    "containerPort": 8080,
+			    "protocol": "TCP"
+			 },
+			 {
+			    "containerPort": 8443,
+			    "protocol": "TCP"
+			 },
+			 {
+			    "containerPort": 8778,
+			    "protocol": "TCP"
+			 }
+		       ],
+		       "resources": {}
+		    }
+		 ]
+	      }
+	   }
+	}
+     }
+  ],
+  "parameters": [
+    {
+       "name": "APP_NAME",
+       "displayName": "Name of the Application."
+    },
+    {
+       "name": "PROJECT",
+       "displayName": "Project",
+       "description": "Environment to be deployed on."
+    }
+  ]
 }
