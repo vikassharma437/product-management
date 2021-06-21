@@ -141,8 +141,9 @@
 						"apiVersion": "apps/v1",
 						"metadata": {
 								"name": "${APP_NAME}",
-								"labels":
+								"labels": {
 									 "app": "${APP_NAME}"
+								}
 						},
 						"spec": {
 								"strategy": {
@@ -167,7 +168,6 @@
 																"kind": "ImageStreamTag",
 																"name": "${APP_NAME}:latest"
 														}
-
 												},
 												"type": "ImageChange"
 										}
