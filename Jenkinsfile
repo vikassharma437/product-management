@@ -1,3 +1,5 @@
+#!groovy
+
 def DEV_API_SERVER="https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
 def DEV_NAMESPACE = "dev"
 def templatePath = "/tmp/workspace/cicd-sample-app-dev/config/template.json"
