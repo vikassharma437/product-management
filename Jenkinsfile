@@ -14,7 +14,7 @@ pipeline{
 				DEV_NAMESPACE = "dev"
     }
 		stages {
-        stage('Build Common Lib'){
+        stage('Parent Build'){
           steps {
             sh "mkdir -p /tmp/common-lib"
             dir("/tmp/common-lib") {
@@ -90,7 +90,7 @@ pipeline{
 				       }
 			    }
 		  }
-		  stage('Tag Image') {
+		  stage('Tag Image in Development Project') {
 			    steps {
 				      script {
                   openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
