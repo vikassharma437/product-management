@@ -1,4 +1,4 @@
-#!groovy
+#!bash
 def templatePath = "/tmp/workspace/cicd-sample-app-dev/config/template.json"
 def mvnCmd = "mvn -s /tmp/workspace/cicd-sample-app-dev/config/settings.xml"
 
