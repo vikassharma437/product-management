@@ -51,7 +51,13 @@ pipeline {
                 echo "Using project: ${openshift.project()}"
                 echo "Using AppName: ${appName}"
                 sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                sh "oc delete is ${appName}:latest -n ${SIT_NAMESPACE}"
+                imagestream = sh(script: 'oc get is ${appName}:latest -n ${SIT_NAMESPACE} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+                imagestream = imagestream.trim()
+                echo "Image Stream contains: '${imagestream}'"
+
+                if(buildconf == 'true') {
+                   sh('oc delete is ${appName}:latest -n ${SIT_NAMESPACE}')
+                }
                 sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:${env.BUILD_NUMBER} -n ${SIT_NAMESPACE}"
                 sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:latest -n ${SIT_NAMESPACE}"
               }
