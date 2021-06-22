@@ -37,7 +37,7 @@ pipeline{
 		def uatRegistryEncToken = uatTempVariable.replaceAll("\n", "")
 		echo "uatRegistryEncToken is '${uatRegistryEncToken}'"
 		
-		sh '''
+		sh """
 	        cat $HOME/.docker/config.json
 		sed -i "s/SourceRegistryPass/$devRegistryEncToken/g" $HOME/.docker/config.json
 		sed -i "s/sourceRegistry/$DEV_REGISTRY_URL/g" $HOME/.docker/config.json
@@ -45,7 +45,7 @@ pipeline{
 		sed -i "s/DestRegistry/$UAT_REGISTRY_URL/g" $HOME/.docker/config.json
 		cat $HOME/.docker/config.json
 		oc image mirror ${DEV_REGISTRY_URL}/${SIT_NAMESPACE}/${appName}:latest ${UAT_REGISTRY_URL}/${UAT_NAMESPACE}/${appName}:latest --insecure=true
-		'''
+		"""
 	      } catch(e) {
 		print e.getMessage()
 		error "${UAT_NAMESPACE} stage having some issue. Please check logs for more details."
@@ -186,7 +186,7 @@ pipeline{
 		def uatRegistryEncToken = uatTempVariable.replaceAll("\n", "")
 		echo "uatRegistryEncToken is '${uatRegistryEncToken}'"
 		
-		sh '''
+		sh """
 		cat $HOME/.docker/config.json
 		sed -i "s/SourceRegistryPass/$uatRegistryEncToken/g" $HOME/.docker/config.json
 		sed -i "s/SourceRegistry/$UAT_REGISTRY_URL/g" $HOME/.docker/config.json
@@ -194,7 +194,7 @@ pipeline{
 		sed -i "s/DestRegistry/$DEV_REGISTRY_URL/g" $HOME/.docker/config.json
 		cat $HOME/.docker/config.json
 		oc image mirror ${UAT_REGISTRY_URL}/${PT_NAMESPACE}/${appName}:latest ${DEV_REGISTRY_URL}/${TRN_NAMESPACE}/${appName}:latest --insecure=true
-		'''
+		"""
 	      } catch(e) {
 		print e.getMessage()
 		error "${TRN_NAMESPACE} stage having some issue. Please check logs for more details."
