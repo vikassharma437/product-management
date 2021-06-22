@@ -10,13 +10,13 @@ pipeline{
 	appVersion = "0.0.1-SNAPSHOT"
       	buildconf  = "false"
         DEV_API_SERVER = "https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
-        UAT_API_SERVER = ""
+        UAT_API_SERVER = "https://api.cluster-e5d3.e5d3.example.opentlc.com:6443"
         SIT_NAMESPACE  = "sit"
         TRN_NAMESPACE  = "training"
         UAT_NAMESPACE  = "uat"
         PERF_NAMESPACE = "pt"
-        DEV_REGISTRY_URL = ""
-        UAT_REGISTRY_URL = ""
+        DEV_REGISTRY_URL = "default-route-openshift-image-registry.apps.cluster-89e8.89e8.sandbox1804.opentlc.com"
+        UAT_REGISTRY_URL = "default-route-openshift-image-registry.apps.cluster-e5d3.e5d3.example.opentlc.com"
     }
     stages{
       stage('Deploy Template in UAT Namespace') {
