@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>in.con.redhat</groupId>
 			<artifactId>rh-common-lib</artifactId>
-			<version>0.0.1</version>
+			<version>1.0.0</version>
 		</dependency>
 		<!-- External Dependencies -->
 		<dependency>
