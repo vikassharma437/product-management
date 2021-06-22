@@ -1,9 +1,16 @@
-# product-management
-This is sample spring boot application.
+# CICD Demo with Jenkins on OpenShift
+This repo is used for CICD demo using Jenkins for continous delivery on Openshift which build and deploy the sample spring boot product management application.
 
-The main aim of this application is to:
+This demo creates:
 
-1. Checkout scm at code commit.
-2. Publish the snapshot or released version to Nexus Repository. 
-3. Perform unit test cases and deploy the k8s resources to Openshift Orchestration platform.
-4. Promote the dev image to SIT, UAT, PT, PROD and TR environment.
+1. DEV, SIT, UAT, PERF and TRAINING Namespaces in two different clusters.
+2. Jenkins pipeline for building the sample-app image on every git commit using Github webhook.
+3. Sonatype Nexus OSS with username: admin and password: admin@123.
+4. Promote the build image to Nexus (Nexus Integration with Jenkins).
+
+# Prerequisite
+1. Two Openshift clusters.
+2. Install Jenkins with Persistent Storage on one cluster.
+3. Install Nexus Sonatype OSS on another cluster.
+4. Create Dev, SIT and training namespace on cluster where Nexus is installed.
+5. Create UAT and PERF namespace on cluster where Jenkins is Installed.
