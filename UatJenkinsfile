@@ -86,7 +86,7 @@ pipeline{
                   openshift.withProject("${PERF_NAMESPACE}") {
                     echo "Using project: ${openshift.project()}"
                     echo "Using AppName: ${appName}"
-                    sh('oc login -u ${UAT_OCP_USER} -p ${UAT_OCP_PASSWD} ${UAT_API_SERVER} -n ${PERF_NAMESPACE} --insecure-skip-tls-verify=true')
+                    sh('oc login -u $UAT_OCP_USER -p $UAT_OCP_PASSWD ${UAT_API_SERVER} -n ${PERF_NAMESPACE} --insecure-skip-tls-verify=true')
                     buildconf = sh(script: 'oc get bc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
                     buildconf = buildconf.trim()
                     echo "BuildConfig status contains: '${buildconf}'"
