@@ -25,13 +25,6 @@ pipeline {
                 echo "Using project: ${openshift.project()}"
                 echo "Using AppName: ${appName}"
                 sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                /*def imagestream = sh(script: 'oc get is ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
-                imagestream = imagestream.trim()
-                echo "Image Stream contains: '${imagestream}'"
-
-                if(imagestream == 'true') {
-                   sh('oc delete is ${appName}:latest -n ${SIT_NAMESPACE}')
-                }*/
                 sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:${env.BUILD_NUMBER} -n ${SIT_NAMESPACE}"
                 sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:latest -n ${SIT_NAMESPACE}"
               }
@@ -52,7 +45,7 @@ pipeline {
                 openshift.withProject("${SIT_NAMESPACE}") {
                   echo "Using Project: ${openshift.project()}"
                   sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                  dc = sh(script: 'oc get dc -n $SIT_NAMESPACE >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+                  dc = sh(script: 'oc get dc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
                   dc = dc.trim()
                   echo "Deployment Config contains: '${dc}'"
                   
