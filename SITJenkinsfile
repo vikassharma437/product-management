@@ -32,7 +32,7 @@ pipeline {
                    sh('oc delete is ${appName}:latest -n ${SIT_NAMESPACE}')
                 }*/
                 sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:${env.BUILD_NUMBER} -n ${SIT_NAMESPACE}"
-                sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName} -n ${SIT_NAMESPACE}"
+                sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:latest -n ${SIT_NAMESPACE}"
               }
             }
           } catch(e) {
