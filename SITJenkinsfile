@@ -24,7 +24,7 @@ pipeline {
                 echo "Using project: ${openshift.project()}"
                 echo "Using AppName: ${appName}"
                 sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                def imagestream = sh(script: 'oc get is ${appName}:latest -n ${SIT_NAMESPACE} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+                def imagestream = sh(script: 'oc get is ${appName}:latest >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
                 imagestream = imagestream.trim()
                 echo "Image Stream contains: '${imagestream}'"
 
@@ -58,16 +58,16 @@ pipeline {
                   if('true' == dc) {
                      echo "Application already exist. Hence rolling out the latest updates on the same."
                      sh """
-                     oc rollout resume dc/${appName} -n ${SIT_NAMESPACE}
-                     oc rollout status dc/${appName} -n ${SIT_NAMESPACE} -w
-                     oc rollout pause  dc/${appName} -n ${SIT_NAMESPACE}
+                     oc rollout resume dc ${appName} -n ${SIT_NAMESPACE}
+                     oc rollout status dc ${appName} -n ${SIT_NAMESPACE} -w
+                     oc rollout pause  dc ${appName} -n ${SIT_NAMESPACE}
                      """
                      echo "Application ${appName}:${env.BUILD_NUMBER} has been successfully deployed to ${SIT_NAMESPACE} namespace."
                   } else {
                      echo "Using project: ${openshift.project()}"
                      echo "Deploying the ${appName}:${env.BUILD_NUMBER} application binary to ${SIT_NAMESPACE} namespace"
                      sh """
-                     oc new-app ${appName}:latest -n ${SIT_NAMESPACE}
+                     oc new-app ${appName}:latest --as-deployment-config -n ${SIT_NAMESPACE}
                      oc rollout status dc ${appName} -n ${SIT_NAMESPACE} -w
                      oc rollout pause  dc ${appName} -n ${SIT_NAMESPACE}
                      """
