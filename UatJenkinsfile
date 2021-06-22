@@ -58,7 +58,7 @@ pipeline{
 		echo "devRegistryEncToken is '${devRegistryEncToken}'"
 	        cat $HOME/.docker/config.json
 		sed -i "s/SourceRegistryPass/$devRegistryEncToken/g" $HOME/.docker/config.json
-		sed -i "s/SourceRegistry/$DEV_REGISTRY_URL/g" $HOME/.docker/config.json
+		sed -i "s/sourceRegistry/$DEV_REGISTRY_URL/g" $HOME/.docker/config.json
 		sed -i "s/DestRegistryPass/$UAT_OCP_PASSWD/g" $HOME/.docker/config.json
 		sed -i "s/DestRegistry/$UAT_REGISTRY_URL/g" $HOME/.docker/config.json
 		cat $HOME/.docker/config.json
