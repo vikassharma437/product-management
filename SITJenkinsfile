@@ -15,7 +15,7 @@ pipeline {
     DEV_API_SERVER= "https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
   }
   stages {
-    stage('Deploy Template in SIT Namespace') {
+    /*stage('Deploy Template in SIT Namespace') {
       steps{
         script {
           try {
@@ -41,7 +41,7 @@ pipeline {
           }
         }
       }
-    }
+    }*/
     stage('Promote Image in SIT Namespace') {
       steps {
         script {
@@ -71,7 +71,8 @@ pipeline {
                 openshift.withProject("${SIT_NAMESPACE}") {
                   echo "Using project: ${openshift.project()}"
                   sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                  sh(script: 'oc start-build ${appName} --wait=true --follow=true', returnStdout:true).trim()
+                  //sh(script: 'oc start-build ${appName} --wait=true --follow=true', returnStdout:true).trim()
+                  sh(script: 'oc new-app ${appName} -n ${SIT_NAMESPACE}', returnStdout:true).trim()
                   echo "Build ${appName} deployed successfully"
                 }
               }
