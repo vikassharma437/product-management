@@ -8,6 +8,7 @@ pipeline {
     appName = "sample-app"
     appVersion = "0.0.1-SNAPSHOT"
     buildconf = "false"
+    dc = "false"
     DEV_NAMESPACE = "dev"
     SIT_NAMESPACE = "sit"
     templatePath = "config/template.json"
@@ -51,7 +52,7 @@ pipeline {
                 openshift.withProject("${SIT_NAMESPACE}") {
                   echo "Using Project: ${openshift.project()}"
                   sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                  def dc = sh(script: 'oc get dc -n $SIT_NAMESPACE >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+                  dc = sh(script: 'oc get dc -n $SIT_NAMESPACE >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
                   dc = dc.trim()
                   echo "Deployment Config contains: '${dc}'"
                   
