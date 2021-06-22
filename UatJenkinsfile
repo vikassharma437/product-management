@@ -1,0 +1,188 @@
+#!bash
+def templatePath = "config/template.json"
+
+pipeline{
+		agent{
+				label 'docker'
+		}
+    environment {
+      	appName = "sample-app"
+				appVersion = "0.0.1-SNAPSHOT"
+      	buildconf  = "false"
+        DEV_API_SERVER = "https://api.dev.icegate.gov.in:6443"
+        UAT_API_SERVER = "https://api.test.icegate.gov.in:6443"
+        SIT_NAMESPACE  = "sit"
+        TRN_NAMESPACE  = "training"
+        UAT_NAMESPACE  = "uat"
+        PERF_NAMESPACE = "pt"
+        DEV_REGISTRY_URL = ""
+        UAT_REGISTRY_URL = ""
+    }
+		stages{
+				stage('Deploy Template in UAT Namespace') {
+					steps{
+						script {
+							try {
+                openshift.withCluster() {
+                  openshift.withProject("${UAT_NAMESPACE}") {
+                    echo "Using project: ${openshift.project()}"
+                    echo "Using AppName: ${appName}"
+                    sh('oc login -u $UAT_OCP_USER -p $UAT_OCP_PASSWD ${UAT_API_SERVER} -n ${UAT_NAMESPACE} --insecure-skip-tls-verify=true')
+                    buildconf = sh(script: 'oc get bc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+                    buildconf = buildconf.trim()
+                    echo "BuildConfig status contains: '${buildconf}'"
+
+                    if(buildconf == 'false') {
+                       sh "oc new-app ${templatePath} -n ${UAT_NAMESPACE} -p PROJECT=${UAT_NAMESPACE} -p APP_NAME=${appName}"
+                    } else {
+                      echo "Template is already exist. Hence, skipping this stage."
+                    }
+                  }
+                }
+              } catch(e) {
+                print e.getMessage()
+                error "${UAT_NAMESPACE} stage having some issue. Please check logs for more details."
+              }
+            }
+          }
+        }
+        stage('Promote Image in UAT Namespace') {
+					steps{
+						script {
+							try {
+								sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} --insecure-skip-tls-verify=true')
+                def devTempVariable = sh(script: 'echo -n $DEV_OCP_USER:`oc whoami -t`  | base64 ', returnStdout: true).trim()
+								echo "Dev temporary variable contains: '${devTempVariable}'"
+								def devRegistryEncToken = devTempVariable.replaceAll("\n", "")
+								sh """
+								echo "devRegistryEncToken is '${devRegistryEncToken}'"
+								cat $HOME/.docker/config.json
+								sed -i "s/SourceRegistryPass/$devRegistryEncToken/g" $HOME/.docker/config.json
+								sed -i "s/SourceRegistry/$DEV_REGISTRY_URL/g" $HOME/.docker/config.json
+								sed -i "s/DestRegistryPass/$UAT_OCP_PASSWD/g" $HOME/.docker/config.json
+								sed -i "s/DestRegistry/$UAT_REGISTRY_URL/g" $HOME/.docker/config.json
+								cat $HOME/.docker/config.json
+								oc image mirror ${DEV_REGISTRY_URL}/${SIT_NAMESPACE}/${appName}:latest ${UAT_REGISTRY_URL}/${UAT_NAMESPACE}/${appName}:latest --insecure=true
+								"""
+							} catch(e) {
+								print e.getMessage()
+								error "${UAT_NAMESPACE} stage having some issue. Please check logs for more details."
+							}
+					  }
+			    }
+		    }
+        stage('Cleared to PT') {
+					steps {
+						script {
+							input message: 'Do you want to deploy template to PT namespace?'
+						}
+					}
+				}
+				stage('Deploy Template in PT Namespace') {
+  					steps{
+  							script {
+  									try {
+                        openshift.withCluster() {
+                            openshift.withProject("${PERF_NAMESPACE}") {
+                              echo "Using project: ${openshift.project()}"
+                              echo "Using AppName: ${appName}"
+                              sh('oc login -u ${UAT_OCP_USER} -p ${UAT_OCP_PASSWD} ${UAT_API_SERVER} -n ${PERF_NAMESPACE} --insecure-skip-tls-verify=true')
+                              buildconf = sh(script: 'oc get bc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+                              buildconf = buildconf.trim()
+                              echo "BuildConfig status contains: '${buildconf}'"
+
+                              if(buildconf == 'false') {
+                                 sh "oc new-app ${templatePath} -n ${PT_NAMESPACE} -p PROJECT=${PERF_NAMESPACE} -p APP_NAME=${appName}"
+                              } else {
+                                echo "Template is already exist. Hence, skipping this stage."
+                              }
+                           }
+                        }
+                     } catch(e) {
+                       print e.getMessage()
+                       error "${PERF_NAMESPACE} stage having some issue. Please check logs for more details."
+                     }
+                }
+           }
+        }
+        stage('Promote Image in PT Namespace') {
+				  steps{
+						script {
+							try {
+									openshift.withCluster() {
+											openshift.withProject("${PERF_NAMESPACE}") {
+												echo "Using project: ${openshift.project()}"
+												echo "Using AppName: ${appName}"
+												sh('oc login -u $UAT_OCP_USER -p $UAT_OCP_PASSWD ${UAT_API_SERVER} -n ${PERF_NAMESPACE} --insecure-skip-tls-verify=true')
+												sh "oc tag ${UAT_NAMESPACE}/${appName}:latest ${PERF_NAMESPACE}/${appName}:${env.BUILD_NUMBER} -n ${PERF_NAMESPACE}"
+												sh "oc tag ${UAT_NAMESPACE}/${appName}:latest ${PERF_NAMESPACE}/${appName}:latest -n ${PERF_NAMESPACE}"
+										 }
+									}
+							} catch(e) {
+									print e.getMessage()
+								  error "${PERF_NAMESPACE} stage having some issue. Please check logs for more details."
+							}
+					  }
+			    }
+	      }
+        stage('Cleared to Training') {
+					steps {
+						script {
+							input message: 'Do you want to deploy template to Training namespace?'
+						}
+					}
+				}
+				stage('Deploy Template in Training Namespace') {
+					steps {
+						script {
+							try {
+                openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
+                  openshift.withProject("${TRN_NAMESPACE}") {
+                    echo "Using project: ${openshift.project()}"
+                    echo "Using AppName: ${appName}"
+                    sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${TRN_NAMESPACE} --insecure-skip-tls-verify=true')
+                    buildconf = sh(script: 'oc get bc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+                    buildconf = buildconf.trim()
+                    echo "BuildConfig status contains: '${buildconf}'"
+
+                    if(buildconf == 'false') {
+                       sh "oc new-app ${templatePath} -n ${TRN_NAMESPACE} -p PROJECT=${TRN_NAMESPACE} -p APP_NAME=${appName}"
+                    } else {
+                      echo "Template is already exist. Hence, skipping this stage."
+                    }
+                  }
+                }
+              } catch(e) {
+                print e.getMessage()
+                echo "${TRN_NAMESPACE} stage having some issue. Please check logs for more details."
+              }
+            }
+          }
+        }
+	      stage('Promote Image in Training Namespace') {
+			    steps {
+					  script {
+							try {
+							 		sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} --insecure-skip-tls-verify=true')
+									def tempDevVariable = sh(script: 'echo -n $DEV_OCP_USER:`oc whoami -t`  | base64 ', returnStdout: true).trim()
+									echo "temporary dev variable contains: '${tempDevVariable}'"
+									def devRegistryEncToken = tempDevVariable.replaceAll("\n", "")
+									sh """
+									echo "devRegistryEncToken is '${devRegistryEncToken}'"
+									cat $HOME/.docker/config.json
+									sed -i "s/SourceRegistryPass/$UAT_OCP_PASSWD/g" $HOME/.docker/config.json
+									sed -i "s/SourceRegistry/$UAT_REGISTRY_URL/g" $HOME/.docker/config.json
+									sed -i "s/DestRegistryPass/$devRegistryEncToken/g" $HOME/.docker/config.json
+									sed -i "s/DestRegistry/$DEV_REGISTRY_URL/g" $HOME/.docker/config.json
+									cat $HOME/.docker/config.json
+									oc image mirror ${UAT_REGISTRY_URL}/${PT_NAMESPACE}/${appName}:latest ${DEV_REGISTRY_URL}/${TRN_NAMESPACE}/${appName}:latest --insecure=true
+									"""
+							} catch(e) {
+									print e.getMessage()
+									error "${TRN_NAMESPACE} stage having some issue. Please check logs for more details."
+							}
+					 }
+			  }
+     }
+  }
+}
