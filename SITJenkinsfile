@@ -6,13 +6,10 @@ pipeline {
   }
   environment {
     appName = "sample-app"
-    appVersion = "0.0.1-SNAPSHOT"
     buildconf = "false"
     dc = "false"
     DEV_NAMESPACE = "dev"
     SIT_NAMESPACE = "sit"
-    templatePath = "config/template.json"
-    settingsXml  = "config/settings.xml"
     DEV_API_SERVER= "https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
   }
   stages {
@@ -20,18 +17,13 @@ pipeline {
       steps {
         script {
           try {
-            openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
-              openshift.withProject("${SIT_NAMESPACE}") {
-                echo "Using project: ${openshift.project()}"
-                echo "Using AppName: ${appName}"
-                sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:${env.BUILD_NUMBER} -n ${SIT_NAMESPACE}"
-                sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:latest -n ${SIT_NAMESPACE}"
-              }
-            }
+            echo "Using project: ${openshift.project()}"
+            echo "Using AppName: ${appName}"
+            sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
+            sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:latest -n ${SIT_NAMESPACE}"
           } catch(e) {
-             print e.getMessage()
-             error "${SIT_NAMESPACE} promote stage having some issue. Please check logs for more details."
+            print e.getMessage()
+            error "${SIT_NAMESPACE} promote stage having some issue. Please check logs for more details."
           }
         }
       }
@@ -40,34 +32,30 @@ pipeline {
       steps {
         script {
           try {
-            timeout(time: 120, unit: 'SECONDS') {
-              openshift.withCluster('devCluster', "$DEV_OCP_PASSWD") {
-                openshift.withProject("${SIT_NAMESPACE}") {
-                  echo "Using Project: ${openshift.project()}"
-                  sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
-                  dc = sh(script: 'oc get dc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
-                  dc = dc.trim()
-                  echo "Deployment Config contains: '${dc}'"
-                  
-                  if('true' == dc) {
-                     echo "Application already exist. Hence rolling out the latest updates on the same."
-                     sh """
-                     oc rollout resume dc ${appName} -n ${SIT_NAMESPACE}
-                     oc rollout status dc ${appName} -n ${SIT_NAMESPACE} -w
-                     oc rollout pause  dc ${appName} -n ${SIT_NAMESPACE}
-                     """
-                     echo "Application ${appName}:${env.BUILD_NUMBER} has been successfully deployed to ${SIT_NAMESPACE} namespace."
-                  } else {
-                     echo "Using project: ${openshift.project()}"
-                     echo "Deploying the ${appName}:${env.BUILD_NUMBER} application binary to ${SIT_NAMESPACE} namespace"
-                     sh """
-                     oc new-app ${appName}:latest --as-deployment-config -n ${SIT_NAMESPACE}
-                     oc rollout status dc ${appName} -n ${SIT_NAMESPACE} -w
-                     oc rollout pause  dc ${appName} -n ${SIT_NAMESPACE}
-                     """
-                     echo "Application ${appName}:${env.BUILD_NUMBER} deployed successfully to ${SIT_NAMESPACE} namespace."     
-                  }
-                }
+            timeout(time: 600, unit: 'SECONDS') {
+              echo "Using Project: ${openshift.project()}"
+              sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
+              dc = sh(script: 'oc get dc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
+              dc = dc.trim()
+              echo "Deployment Config contains: '${dc}'"
+
+              if('true' == dc) {
+                 echo "Application already exist. Hence rolling out the latest updates on the same."
+                 sh """
+                 oc rollout resume dc ${appName} -n ${SIT_NAMESPACE}
+                 oc rollout status dc ${appName} -n ${SIT_NAMESPACE} -w
+                 oc rollout pause  dc ${appName} -n ${SIT_NAMESPACE}
+                 """
+                 echo "Application ${appName}:${env.BUILD_NUMBER} has been successfully deployed to ${SIT_NAMESPACE} namespace."
+              } else {
+                 echo "Using project: ${openshift.project()}"
+                 echo "Deploying the ${appName}:latest application binary to ${SIT_NAMESPACE} namespace"
+                 sh """
+                 oc new-app ${appName}:latest --as-deployment-config -n ${SIT_NAMESPACE}
+                 oc rollout status dc ${appName} -n ${SIT_NAMESPACE} -w
+                 oc rollout pause  dc ${appName} -n ${SIT_NAMESPACE}
+                 """
+                 echo "Application ${appName}:latest deployed successfully to ${SIT_NAMESPACE} namespace."     
               }
             }
           } catch(e) {
