@@ -6,13 +6,15 @@ pipeline{
     agent{
 	label 'docker'
     }
+    tools {
+	jdk 'jdk 1.8'	
+    }
     environment {
       	appName = "sample-app"
 	appVersion = "0.0.1-SNAPSHOT"
       	buildconf = "false"
 	DEV_API_SERVER = "https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
 	DEV_NAMESPACE = "dev"
-	JAVA_HOME="/usr/lib/jvm/java-1.8.0"
     }
     stages {
         stage('Parent Build'){
