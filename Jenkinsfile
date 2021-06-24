@@ -6,9 +6,6 @@ pipeline{
     agent{
 	label 'docker'
     }
-    tools {
-	jdk 'jdk 1.8'	
-    }
     environment {
       	appName = "sample-app"
 	appVersion = "0.0.1-SNAPSHOT"
