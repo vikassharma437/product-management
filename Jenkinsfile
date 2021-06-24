@@ -27,7 +27,7 @@ pipeline{
         }
 	stage('Application Code Compile'){
 	   steps{
-	     sleep time: 12000, unit: 'SECONDS'
+	     //sleep time: 12000, unit: 'SECONDS'
 	     sh "${mvnCmd} clean compile"
 	   }
 	}
