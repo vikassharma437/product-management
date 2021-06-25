@@ -1,5 +1,4 @@
 #!bash
-
 pipeline {
   agent {
     label 'docker'
@@ -17,7 +16,6 @@ pipeline {
       steps {
         script {
           try {
-            echo "Using project: ${openshift.project()}"
             echo "Using AppName: ${appName}"
             sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
             sh "oc tag ${DEV_NAMESPACE}/${appName}:latest ${SIT_NAMESPACE}/${appName}:latest -n ${SIT_NAMESPACE}"
@@ -33,7 +31,6 @@ pipeline {
         script {
           try {
             timeout(time: 600, unit: 'SECONDS') {
-              echo "Using Project: ${openshift.project()}"
               sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} -n ${SIT_NAMESPACE} --insecure-skip-tls-verify=true')
               dc = sh(script: 'oc get dc ${appName} >> /dev/null 2>&1 && echo "true" || echo "false"', returnStdout: true)
               dc = dc.trim()
@@ -48,7 +45,6 @@ pipeline {
                  """
                  echo "Application ${appName}:${env.BUILD_NUMBER} has been successfully deployed to ${SIT_NAMESPACE} namespace."
               } else {
-                 echo "Using project: ${openshift.project()}"
                  echo "Deploying the ${appName}:latest application binary to ${SIT_NAMESPACE} namespace"
                  sh """
                  oc new-app ${appName}:latest --as-deployment-config -n ${SIT_NAMESPACE}
