@@ -25,29 +25,30 @@ pipeline{
 	        withCredentials([usernamePassword(credentialsId: 'dev-ocp-credentials', passwordVariable: 'DEV_OCP_PASSWD', usernameVariable: 'DEV_OCP_USER'), 
 				 usernamePassword(credentialsId: 'uat-ocp-credentials', passwordVariable: 'UAT_OCP_PASSWD', usernameVariable: 'UAT_OCP_USER')]) {
 	        
-		//login to DEV OCP cluster and generate encrypted tokens
-		sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} --insecure-skip-tls-verify=true')
-                def devTempVariable = sh(script: 'echo -n $DEV_OCP_USER:`oc whoami -t` | base64 ', returnStdout: true).trim()
-		echo "Dev temporary variable contains: '${devTempVariable}'"
-		def devRegistryEncToken = devTempVariable.replaceAll("\n", "")
-		echo "devRegistryEncToken is '${devRegistryEncToken}'"
+		  //login to DEV OCP cluster and generate encrypted tokens
+		  sh('oc login -u $DEV_OCP_USER -p $DEV_OCP_PASSWD ${DEV_API_SERVER} --insecure-skip-tls-verify=true')
+                  def devTempVariable = sh(script: 'echo -n $DEV_OCP_USER:`oc whoami -t` | base64 ', returnStdout: true).trim()
+		  echo "Dev temporary variable contains: '${devTempVariable}'"
+		  def devRegistryEncToken = devTempVariable.replaceAll("\n", "")
+		  echo "devRegistryEncToken is '${devRegistryEncToken}'"
 		
-		//login to UAT OCP cluster and generate encrypted tokens
-		sh('oc login -u $UAT_OCP_USER -p $UAT_OCP_PASSWD ${UAT_API_SERVER} --insecure-skip-tls-verify=true')
-                def uatTempVariable = sh(script: 'echo -n $UAT_OCP_USER:`oc whoami -t` | base64 ', returnStdout: true).trim()
-		echo "Uat temporary variable contains: '${uatTempVariable}'"
-		def uatRegistryEncToken = uatTempVariable.replaceAll("\n", "")
-		echo "uatRegistryEncToken is '${uatRegistryEncToken}'"
+		  //login to UAT OCP cluster and generate encrypted tokens
+		  sh('oc login -u $UAT_OCP_USER -p $UAT_OCP_PASSWD ${UAT_API_SERVER} --insecure-skip-tls-verify=true')
+                  def uatTempVariable = sh(script: 'echo -n $UAT_OCP_USER:`oc whoami -t` | base64 ', returnStdout: true).trim()
+		  echo "Uat temporary variable contains: '${uatTempVariable}'"
+		  def uatRegistryEncToken = uatTempVariable.replaceAll("\n", "")
+		  echo "uatRegistryEncToken is '${uatRegistryEncToken}'"
 		
-		sh """
-	        cat $HOME/.docker/config.json
-		sed -i "s/SourceRegistryPass/$devRegistryEncToken/g" $HOME/.docker/config.json
-		sed -i "s/sourceRegistry/$DEV_REGISTRY_URL/g" $HOME/.docker/config.json
-		sed -i "s/DestRegistryPass/$uatRegistryEncToken/g" $HOME/.docker/config.json
-		sed -i "s/DestRegistry/$UAT_REGISTRY_URL/g" $HOME/.docker/config.json
-		cat $HOME/.docker/config.json
-		oc image mirror ${DEV_REGISTRY_URL}/${SIT_NAMESPACE}/${appName}:latest ${UAT_REGISTRY_URL}/${UAT_NAMESPACE}/${appName}:latest --insecure=true
-		"""
+		  sh """
+	          cat $HOME/.docker/config.json
+		  sed -i "s/SourceRegistryPass/$devRegistryEncToken/g" $HOME/.docker/config.json
+		  sed -i "s/sourceRegistry/$DEV_REGISTRY_URL/g" $HOME/.docker/config.json
+		  sed -i "s/DestRegistryPass/$uatRegistryEncToken/g" $HOME/.docker/config.json
+		  sed -i "s/DestRegistry/$UAT_REGISTRY_URL/g" $HOME/.docker/config.json
+		  cat $HOME/.docker/config.json
+		  oc image mirror ${DEV_REGISTRY_URL}/${SIT_NAMESPACE}/${appName}:latest ${UAT_REGISTRY_URL}/${UAT_NAMESPACE}/${appName}:latest --insecure=true
+		  """
+		}
 	      } catch(e) {
 		print e.getMessage()
 		error "${UAT_NAMESPACE} stage having some issue. Please check logs for more details."
