@@ -8,7 +8,7 @@ This demo creates:
 3. Sonatype Nexus OSS with username: admin and password: admin@123.
 4. Promote the build image to Nexus (Nexus Integration with Jenkins).
 
-# Prerequisite
+# Prerequisite for CICD
 1. Two Openshift clusters.
 2. Install Jenkins with Persistent Storage on one cluster.
 3. Install Nexus Sonatype OSS on another cluster.
