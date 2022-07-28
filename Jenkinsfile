@@ -20,7 +20,7 @@ pipeline{
             sh "mkdir -p /tmp/common-lib"
             dir("/tmp/common-lib") {
               git branch: 'main',
-              credentialsId: 'git-credential',
+              //credentialsId: 'git-credential',
               url: 'https://github.com/vikassharma437/common-lib.git'
               sh "${mvnCmd} clean deploy -DskipTests=true -Dversion=${env.BUILD_NUMBER}"
             }
