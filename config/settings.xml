@@ -24,7 +24,7 @@
       <mirror>
           <id>nexus</id>
           <name>nexus</name>
-          <url>http://nexus-repository-manager-nexus.apps.cluster-lb0d19.lb0d19.example.opentlc.com//repository/maven-group/</url>
+          <url>http://nexus-repository-manager-nexus.apps.cluster-lb0d19.lb0d19.example.opentlc.com/repository/maven-group/</url>
           <mirrorOf>*</mirrorOf>
       </mirror>
   </mirrors>
