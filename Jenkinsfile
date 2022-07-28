@@ -1,7 +1,7 @@
 #!bash
-def _WORKDIR_ = pwd()
-def templatePath = "${_WORKDIR_}/config/template.json"
-def mvnCmd = "mvn -s ${_WORKDIR_}/config/settings.xml"
+def WORKSPACE = pwd()
+def templatePath = "${WORKSPACE}/config/template.json"
+def mvnCmd = "mvn -s ${WORKSPACE}/config/settings.xml"
 
 pipeline{
     agent{
