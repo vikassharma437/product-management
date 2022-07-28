@@ -1,7 +1,4 @@
 #!bash
-def WORKSPACE = pwd()
-def templatePath = "/tmp/workspace/cicd-sample-app-dev/config/template.json"
-def mvnCmd = "mvn -s /tmp/workspace/cicd-sample-app-dev/config/settings.xml"
 
 pipeline{
     agent{
@@ -13,6 +10,9 @@ pipeline{
       	buildconf = "false"
 	DEV_API_SERVER = "https://api.cluster-lb0d19.lb0d19.example.opentlc.com:6443"
 	DEV_NAMESPACE = "dev"
+	WORKSPACE = pwd()
+	templatePath = "${WORKSPACE}/config/template.json"
+	mvnCmd = "mvn -s ${WORKSPACE}/config/settings.xml"
     }
     stages {
         stage('Parent Build'){
