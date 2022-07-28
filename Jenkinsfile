@@ -1,6 +1,7 @@
 #!bash
-def templatePath = "/tmp/workspace/cicd-sample-app-dev/config/template.json"
-def mvnCmd = "mvn -s /tmp/workspace/cicd-sample-app-dev/config/settings.xml"
+def _WORKDIR_ = pwd()
+def templatePath = "${_WORKDIR_}/config/template.json"
+def mvnCmd = "mvn -s ${_WORKDIR_}/config/settings.xml"
 
 pipeline{
     agent{
@@ -10,7 +11,7 @@ pipeline{
       	appName = "sample-app"
 	appVersion = "0.0.1-SNAPSHOT"
       	buildconf = "false"
-	DEV_API_SERVER = "https://api.cluster-89e8.89e8.sandbox1804.opentlc.com:6443"
+	DEV_API_SERVER = "https://api.cluster-lb0d19.lb0d19.example.opentlc.com:6443"
 	DEV_NAMESPACE = "dev"
     }
     stages {
